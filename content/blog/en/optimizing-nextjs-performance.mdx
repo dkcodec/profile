@@ -1,0 +1,63 @@
+---
+title: "Optimizing Next.js Performance: From 60% to 2% Server Load"
+description: "A deep dive into the caching strategies and SSR optimizations that reduced our server load by 95% at Daribar."
+date: "2025-01-15"
+tags: ["Next.js", "Performance", "SSR", "Caching"]
+author: "Dmitriy Kairgeldin"
+published: true
+---
+
+## The Problem
+
+When I joined Daribar, the server was consistently running at 60-80% CPU load. Page response times were unpredictable, and during traffic spikes, the application would become sluggish. The root cause? Every single page request was being server-rendered from scratch, with no caching layer in place.
+
+## The Strategy
+
+I designed a multi-layered caching strategy that addressed the problem at every level:
+
+### 1. CDN-Level Caching
+
+The first and most impactful change was implementing proper CDN caching headers. We configured `Cache-Control` headers with `s-maxage` for our CDN layer, allowing static and semi-static pages to be served directly from the edge.
+
+```typescript
+// Example: Setting cache headers for product pages
+export async function generateMetadata({ params }) {
+  return {
+    other: {
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+    },
+  };
+}
+```
+
+### 2. Device and Locale-Based Cache Segmentation
+
+One of the trickier challenges was that our pages rendered differently based on device type and user locale. We implemented cache key segmentation using the `Vary` header and custom cache keys.
+
+This meant that a mobile user in Russian and a desktop user in English would each get their own cached version, without any unnecessary re-rendering.
+
+### 3. Next.js SSR Optimization
+
+We restructured our data fetching to take full advantage of Next.js's built-in caching:
+
+- **Static pages** were pre-rendered at build time using `generateStaticParams`
+- **Dynamic pages** used ISR (Incremental Static Regeneration) with appropriate revalidation intervals
+- **User-specific content** was loaded client-side to keep the base page cacheable
+
+## The Results
+
+After implementing these changes over several weeks:
+
+- **Server load dropped from 60-80% to 2-5%**
+- **TTFB improved by 85%** on average
+- **Lighthouse performance scores reached 90+**
+- **Infrastructure costs decreased significantly**
+
+## Key Takeaways
+
+1. **Cache everything you can** — most content changes less frequently than you think
+2. **Segment your cache** — don't serve the same cached page to everyone if the content varies
+3. **Measure before and after** — without metrics, you can't prove the impact
+4. **Start with the biggest wins** — CDN caching alone solved 70% of our problem
+
+Performance optimization isn't a one-time task. It's an ongoing process of measuring, identifying bottlenecks, and systematically addressing them.

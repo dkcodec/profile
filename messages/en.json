@@ -1,0 +1,214 @@
+{
+  "metadata": {
+    "title": "Dmitriy Kairgeldin — Frontend Engineer",
+    "description": "Frontend Engineer specializing in high-performance Next.js applications, performance optimization, and modern web development."
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "projects": "Projects",
+    "experience": "Experience",
+    "blog": "Blog",
+    "contact": "Contact"
+  },
+  "hero": {
+    "greeting": "Hi, I'm",
+    "prompt": "whoami",
+    "name": "Dmitriy Kairgeldin",
+    "role": "Frontend Engineer",
+    "comment_role": "// Frontend Engineer",
+    "description": "I build fast, accessible, and beautiful web experiences. Specializing in performance optimization and modern React architecture.",
+    "cta_work": "View My Work",
+    "cta_contact": "Get In Touch",
+    "cta_cv": "Download CV",
+    "status": "Available for opportunities · Astana, Kazakhstan"
+  },
+  "who_am_i": {
+    "title": "Who am I",
+    "bio": "Frontend Engineer with 3+ years of experience building high-performance web applications. I specialize in React, Next.js, and TypeScript, with a deep focus on performance optimization, caching strategies, and delivering exceptional user experiences.",
+    "stat_years": "Years Experience",
+    "stat_lighthouse": "Lighthouse Score",
+    "stat_npm": "NPM Downloads/wk"
+  },
+  "tech": {
+    "title": "Tech Stack",
+    "subtitle": "Tools and technologies I work with daily"
+  },
+  "experience_home": {
+    "title": "Experience",
+    "view_full": "View full timeline"
+  },
+  "stats": {
+    "title": "Coding Stats",
+    "subtitle": "GitHub & Codewars activity",
+    "repos": "Repositories",
+    "stars": "Total Stars",
+    "cw_rank": "Codewars Rank",
+    "challenges": "Challenges",
+    "languages": "Top Languages"
+  },
+  "about": {
+    "title": "About Me",
+    "meta_description": "Learn about Dmitriy Kairgeldin — Frontend Engineer with 3+ years of experience in React, Next.js, TypeScript, and performance optimization.",
+    "bio_title": "Who I Am",
+    "bio": "Frontend Engineer with 3+ years of experience building high-performance web applications. I specialize in React, Next.js, and TypeScript, with a deep focus on performance optimization, caching strategies, and delivering exceptional user experiences.",
+    "bio_extended": "Currently working at Daribar, where I led initiatives that reduced server load from 60-80% to 2-5% and improved Lighthouse scores to 90+. I'm passionate about writing clean, scalable code and solving complex frontend architecture challenges.",
+    "experience_title": "Experience",
+    "tech_title": "Tech Stack",
+    "education_title": "Education",
+    "achievements_title": "Achievements",
+    "present": "Present",
+    "highlights": "Key Highlights"
+  },
+  "experience": {
+    "current": "current",
+    "daribar": {
+      "company": "Daribar",
+      "role": "Frontend Engineer",
+      "period": "Nov 2024 — Present",
+      "location": "Hybrid",
+      "highlights": [
+        "Led performance optimization that reduced server load from 60-80% to 2-5%, significantly lowering infrastructure costs",
+        "Designed and implemented caching strategy using Next.js SSR, CDN-level caching, and device/locale-based cache segmentation",
+        "Improved Core Web Vitals (LCP, TTFB) and Lighthouse scores to 90+, directly impacting SEO and conversions",
+        "Owned complex business-critical flows: multi-step checkout, async cascading filters, dynamic i18n routing, SEO-safe SSR",
+        "Refactored UI architecture to reduce re-renders, simplify state management, and improve scalability"
+      ]
+    },
+    "rokyrocks": {
+      "company": "RokyRocks",
+      "role": "Frontend Engineer",
+      "period": "Nov 2023 — Dec 2024",
+      "location": "Remote",
+      "highlights": [
+        "Built and maintained production-ready front-end architecture from scratch, including admin dashboards and reusable component systems",
+        "Solved complex cross-platform issues (mobile, WebView), ensuring consistent UX across devices",
+        "Collaborated closely with designers and backend engineers using React, Next.js, TypeScript, and Redux Toolkit"
+      ]
+    },
+    "hurtle": {
+      "company": "Hurtle",
+      "role": "Frontend Engineer",
+      "period": "Feb 2023 — Nov 2023",
+      "location": "Remote",
+      "highlights": [
+        "Contributed to the creation, development, and market launch of an innovative job search service with unique features like NeuroResume",
+        "Improved team collaboration and backend integration using ClickUp, React, Bootstrap 5, Redux, and Git"
+      ]
+    }
+  },
+  "experience_page": {
+    "title": "Experience",
+    "meta_description": "Work experience, education, and achievements of Dmitriy Kairgeldin — Frontend Engineer.",
+    "subtitle": "My professional journey and key accomplishments"
+  },
+  "education": {
+    "institution": "Astana IT University",
+    "degree": "Bachelor's in Software Engineering",
+    "period": "2023 — 2026",
+    "location": "Astana, Kazakhstan"
+  },
+  "achievements": {
+    "npm": {
+      "metric": "500+",
+      "label": "Weekly NPM Downloads",
+      "description": "dkcodec-ui component library"
+    },
+    "lighthouse": {
+      "metric": "90+",
+      "label": "Lighthouse Score",
+      "description": "Across all Core Web Vitals"
+    },
+    "server": {
+      "metric": "95%",
+      "label": "Server Load Reduction",
+      "description": "From 60-80% down to 2-5%"
+    }
+  },
+  "projects": {
+    "title": "My Projects",
+    "meta_description": "Explore projects by Dmitriy Kairgeldin — high-performance web applications built with React, Next.js, and TypeScript.",
+    "subtitle": "Selected projects I've built and contributed to",
+    "view_project": "View Project",
+    "view_case": "View Case Study",
+    "view_all": "View All Projects",
+    "tech_stack": "Tech Stack",
+    "role": "Role",
+    "year": "Year",
+    "live_site": "Live Site",
+    "source_code": "Source Code",
+    "highlights": "Highlights"
+  },
+  "projects_data": {
+    "bagsy": {
+      "description": "SaaS platform for business management with multi-step checkout, cascading filters, and performance-optimized SSR.",
+      "long_description": "A comprehensive SaaS platform built for business management. Features include multi-step checkout flows, async cascading filters, dynamic i18n routing, and SEO-safe server-side rendering. Led performance optimization that reduced server load from 60-80% to 2-5%.",
+      "role": "CEO & Lead Frontend Engineer",
+      "year": "2025 - Present",
+      "highlights": [
+        "Lighthouse scores improved to 100",
+        "Complex multi-step forms flow",
+        "Role & attribute based access control",
+        "Design"
+      ]
+    },
+    "dkcodec-ui": {
+      "description": "Open-source React UI component library published on NPM with 500+ weekly downloads.",
+      "long_description": "A modern, accessible React component library with a focus on developer experience. Published on NPM and used across multiple projects. Features typed components, Storybook documentation, and tree-shaking support.",
+      "role": "Creator & Maintainer",
+      "year": "2024",
+      "highlights": [
+        "500+ weekly downloads on NPM",
+        "Fully typed with TypeScript",
+        "Storybook documentation",
+        "Tree-shakeable components"
+      ]
+    },
+    "banking-app": {
+      "description": "Full-stack banking application with real-time transactions, account management, and responsive dashboard.",
+      "long_description": "A full-featured banking application built with modern web technologies. Includes real-time transaction processing, account management, and a responsive admin dashboard. Focused on security, performance, and user experience.",
+      "role": "Full-Stack Developer",
+      "year": "2024",
+      "highlights": [
+        "Real-time transaction processing",
+        "Responsive admin dashboard",
+        "Secure authentication flow",
+        "Performance-optimized data fetching"
+      ]
+    }
+  },
+  "blog": {
+    "title": "Blog",
+    "meta_description": "Articles on frontend development, performance optimization, React, Next.js, and modern web technologies by Dmitriy Kairgeldin.",
+    "subtitle": "Thoughts on frontend development, performance, and the modern web",
+    "read_more": "Read More",
+    "min_read": "min read",
+    "search_placeholder": "Search posts...",
+    "all_tags": "All",
+    "no_posts": "No posts found.",
+    "back_to_blog": "Back to Blog",
+    "view_all_posts": "View all posts"
+  },
+  "contact": {
+    "title": "Get In Touch",
+    "meta_description": "Contact Dmitriy Kairgeldin — Frontend Engineer available for freelance projects, collaborations, and full-time opportunities.",
+    "subtitle": "Have a project in mind or want to collaborate? Let's talk.",
+    "name_label": "Name",
+    "name_placeholder": "Your name",
+    "telegram_label": "Telegram",
+    "telegram_placeholder": "@example",
+    "message_label": "Message",
+    "message_placeholder": "Tell me about your project...",
+    "submit": "Send Message",
+    "sending": "Sending...",
+    "success": "Message sent successfully! I'll get back to you soon.",
+    "error": "Something went wrong. Please try again.",
+    "info_title": "Contact Info",
+    "location": "Astana, Kazakhstan",
+    "availability": "Open to opportunities"
+  },
+  "footer": {
+    "copyright": "Dmitriy Kairgeldin. All rights reserved.",
+    "built_with": "Built with Next.js, TypeScript & Tailwind CSS"
+  }
+}

@@ -1,0 +1,68 @@
+---
+title: "Building a Design System from Scratch"
+description: "Lessons learned from creating dkcodec-ui, an open-source React component library with 500+ weekly downloads on NPM."
+date: "2025-01-08"
+tags: ["React", "Design System", "TypeScript", "Open Source"]
+author: "Dmitriy Kairgeldin"
+published: true
+---
+
+## Why Build a Design System?
+
+After working on multiple projects, I noticed a recurring pattern: I was rebuilding the same components over and over. Buttons, inputs, modals, cards — the same patterns, slightly different each time. That's when I decided to build dkcodec-ui.
+
+## Architecture Decisions
+
+### Component API Design
+
+The most important decision was the component API. I wanted something that felt natural to React developers while being flexible enough for different use cases.
+
+```tsx
+// Simple and intuitive API
+<Button variant="primary" size="lg">
+  Click me
+</Button>
+
+// Composable pattern for complex components
+<Card>
+  <CardHeader>
+    <CardTitle>Title</CardTitle>
+  </CardHeader>
+  <CardContent>Content here</CardContent>
+</Card>
+```
+
+### TypeScript First
+
+Every component is fully typed with TypeScript. This provides autocomplete in editors and catches errors at compile time rather than runtime.
+
+```typescript
+interface ButtonProps {
+  variant: 'primary' | 'secondary' | 'ghost';
+  size: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  children: React.ReactNode;
+}
+```
+
+### Tree-Shaking Support
+
+The library is built with tree-shaking in mind. Each component is a separate module, so bundlers only include the components you actually use.
+
+## Publishing to NPM
+
+The publishing workflow uses GitHub Actions for CI/CD:
+
+1. Version bump and changelog generation
+2. Build the library with Rollup
+3. Run type checking and linting
+4. Publish to NPM registry
+
+## Lessons Learned
+
+- **Start small** — ship a few solid components rather than a huge, untested library
+- **Documentation matters** — Storybook made the library usable for others
+- **Versioning is important** — follow semver strictly to maintain trust
+- **Listen to users** — the best improvements came from community feedback
+
+The library now has 500+ weekly downloads, and it's been a great learning experience in open-source maintainership.

@@ -1,0 +1,83 @@
+---
+title: "Advanced Caching Strategies in Next.js"
+description: "CDN-level caching, device segmentation, and locale-based cache keys for modern web applications."
+date: "2024-12-20"
+tags: ["Next.js", "Caching", "Performance", "Architecture"]
+author: "Dmitriy Kairgeldin"
+published: true
+---
+
+## Beyond Simple Caching
+
+Most tutorials cover the basics of caching — set a `Cache-Control` header and you're done. But in production applications with internationalization, responsive design, and personalized content, caching becomes significantly more nuanced.
+
+## The Cache Hierarchy
+
+In a modern Next.js application, caching happens at multiple levels:
+
+1. **Browser cache** — per-user, controlled by `Cache-Control`
+2. **CDN cache** — shared, edge-level caching
+3. **Application cache** — Next.js Data Cache and Full Route Cache
+4. **Database cache** — query result caching
+
+Each level has different trade-offs between freshness and speed.
+
+## Device-Aware Caching
+
+When your application renders differently for mobile and desktop, you need to segment your cache:
+
+```typescript
+// Using Vary header for device-based caching
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next();
+  const isMobile = request.headers.get('user-agent')?.includes('Mobile');
+  
+  response.headers.set('X-Device-Type', isMobile ? 'mobile' : 'desktop');
+  response.headers.set('Vary', 'X-Device-Type');
+  
+  return response;
+}
+```
+
+This ensures that mobile and desktop users get appropriately cached versions.
+
+## Locale-Based Cache Keys
+
+For internationalized applications, each locale needs its own cache entry:
+
+```typescript
+// Route-based locale caching in Next.js
+// /en/products and /ru/products are cached separately by default
+// But API routes need explicit locale in cache keys
+export async function GET(request: NextRequest) {
+  const locale = request.nextUrl.pathname.split('/')[1];
+  const cacheKey = `products-${locale}`;
+  
+  // Check cache first, then fetch if needed
+}
+```
+
+## Stale-While-Revalidate
+
+The `stale-while-revalidate` pattern is incredibly powerful for production applications. It serves stale content immediately while fetching fresh content in the background.
+
+```
+Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400
+```
+
+This means:
+- For the first hour, serve the cached version
+- After that, serve stale content while revalidating in the background
+- Content is never older than 24 hours
+
+## Cache Invalidation
+
+The hardest problem in computer science, they say. In practice, I've found that time-based invalidation with manual purge capability works well for most applications.
+
+## Key Principles
+
+1. **Cache at the edge** whenever possible — it's the fastest layer
+2. **Segment caches** by the variables that affect output
+3. **Use stale-while-revalidate** for the best user experience
+4. **Monitor cache hit rates** — if they're low, something is wrong
+5. **Have a manual purge mechanism** for emergencies
