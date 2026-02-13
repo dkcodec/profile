@@ -44,14 +44,20 @@ export default async function ProjectPage({ params }: Props) {
       <Container>
         {/* Hero */}
         <div className="relative aspect-[21/9] overflow-hidden rounded-2xl border border-border bg-muted">
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            className="object-cover"
-            priority
-            sizes="(max-width: 1200px) 100vw, 1200px"
-          />
+          {project.image ? (
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 1200px) 100vw, 1200px"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center font-mono text-6xl font-bold text-placeholder">
+              {project.title[0]}
+            </div>
+          )}
         </div>
 
         {/* Content */}

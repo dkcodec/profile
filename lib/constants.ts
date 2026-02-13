@@ -1,3 +1,5 @@
+import type { Project } from "@/types/project";
+
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
 
 export const SOCIAL_LINKS = {
@@ -100,4 +102,4 @@ export const PROJECTS = [
     order: 3,
     link: "https://github.com/dkcodec/Horizon_BankingApp",
   },
-] as const;
+] satisfies Project[];
