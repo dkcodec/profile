@@ -35,7 +35,7 @@ export default async function ProjectPage({ params }: Props) {
   const tData = await getTranslations({ locale, namespace: "projects_data" });
 
   const project = PROJECTS.find((p) => p.slug === slug);
-  if (!project) notFound();
+  if (!project) return notFound();
 
   const highlights = tData.raw(`${slug}.highlights`) as string[];
 
@@ -44,20 +44,14 @@ export default async function ProjectPage({ params }: Props) {
       <Container>
         {/* Hero */}
         <div className="relative aspect-[21/9] overflow-hidden rounded-2xl border border-border bg-muted">
-          {project.image ? (
-            <Image
-              src={project.image}
-              alt={project.title}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 1200px) 100vw, 1200px"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center font-mono text-6xl font-bold text-placeholder">
-              {project.title[0]}
-            </div>
-          )}
+          <Image
+            src={project.image}
+            alt={project.title}
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 1200px) 100vw, 1200px"
+          />
         </div>
 
         {/* Content */}
