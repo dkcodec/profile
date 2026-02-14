@@ -8,15 +8,16 @@ import {
   Float,
   ContactShadows,
   OrbitControls,
+  useProgress,
+  Html,
 } from "@react-three/drei";
 import type { Group } from "three";
 
 const MODEL_PATH = "/models/commodore_64__computer_full_pack.glb";
-const DRACO_PATH = "/draco/";
 
 function Model() {
   const groupRef = useRef<Group>(null);
-  const { scene } = useGLTF(MODEL_PATH, DRACO_PATH);
+  const { scene } = useGLTF(MODEL_PATH);
   const { viewport } = useThree();
 
   const mouse = useRef({ x: 0, y: 0 });
@@ -52,6 +53,21 @@ function Model() {
         <primitive object={scene} />
       </group>
     </Float>
+  );
+}
+
+useGLTF.preload(MODEL_PATH);
+
+function Loader() {
+  const { progress } = useProgress();
+  const { viewport } = useThree();
+  const posX = viewport.width * 0.15;
+  return (
+    <Html position={[posX, 0, 0]} center>
+      <span className="font-mono text-xs text-accent">
+        {progress.toFixed(0)}%
+      </span>
+    </Html>
   );
 }
 
@@ -97,7 +113,7 @@ export function HeroModel() {
         >
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 5, 5]} intensity={0.8} />
-          <Suspense fallback={null}>
+          <Suspense fallback={<Loader />}>
             <Environment files="/environment.hdr" />
             <Model />
             <ContactShadows
