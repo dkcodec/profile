@@ -26,9 +26,42 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!post) return {};
 
+  const siteUrl = "https://kairgeldin.dev";
+  const postUrl = `${siteUrl}/${locale}/blog/${slug}`;
+  const ogImage = post.image ? `${siteUrl}${post.image}` : `${siteUrl}/og-default.png`;
+
   return {
     title: post.title,
     description: post.description,
+    keywords: post.tags,
+    authors: [{ name: post.author, url: siteUrl }],
+    alternates: {
+      canonical: postUrl,
+    },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.description,
+      url: postUrl,
+      locale,
+      publishedTime: post.date,
+      authors: [post.author],
+      tags: post.tags,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+      images: [ogImage],
+    },
   };
 }
 
@@ -56,6 +89,9 @@ export default async function BlogPostPage({ params }: Props) {
           date: post.date,
           slug: post.slug,
           locale,
+          image: post.image,
+          tags: post.tags,
+          readingTime: post.readingTime,
         })}
       />
       <section className="py-12 md:py-24">

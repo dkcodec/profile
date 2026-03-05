@@ -1,83 +1,204 @@
 ---
-title: "Advanced Caching Strategies in Next.js"
-description: "CDN-level caching, device segmentation, and locale-based cache keys for modern web applications."
-date: "2024-12-20"
-tags: ["Next.js", "Caching", "Performance", "Architecture"]
+title: "Next.js + Cloudflare: How I Set Up Caching and What Went Wrong"
+description: "Real experience setting up caching for a production app. No fluff - just the things I actually ran into."
+date: "2025-03-05"
+tags: ["Next.js", "Cloudflare", "Caching", "Performance"]
 author: "Dmitriy Kairgeldin"
 published: true
 ---
 
-## Beyond Simple Caching
+## Why caching matters
 
-Most tutorials cover the basics of caching — set a `Cache-Control` header and you're done. But in production applications with internationalization, responsive design, and personalized content, caching becomes significantly more nuanced.
+Imagine a user opens a product page. Your server hits the database, builds the HTML, sends it back - and does this for every single request. If 1000 people open the same page at the same time, the server does that 1000 times.
 
-## The Cache Hierarchy
+Caching fixes this. The server builds the page once, saves the result, and the next 999 people get a ready-made response - fast, with no extra load on the server.
 
-In a modern Next.js application, caching happens at multiple levels:
+But in Next.js + Cloudflare, caching happens on multiple levels at once. If you don't understand how they interact, things break. I found out the hard way. Here's what happened and how I fixed it.
 
-1. **Browser cache** — per-user, controlled by `Cache-Control`
-2. **CDN cache** — shared, edge-level caching
-3. **Application cache** — Next.js Data Cache and Full Route Cache
-4. **Database cache** — query result caching
+---
 
-Each level has different trade-offs between freshness and speed.
+## Levels of caching
 
-## Device-Aware Caching
+In my stack, cache lives in three places:
 
-When your application renders differently for mobile and desktop, you need to segment your cache:
+**Browser cache** - files are saved directly on the user's device. The fastest level, but you can't reset it remotely. Once a user caches something, they'll keep getting it until it expires.
 
-```typescript
-// Using Vary header for device-based caching
-export function middleware(request: NextRequest) {
-  const response = NextResponse.next();
-  const isMobile = request.headers.get('user-agent')?.includes('Mobile');
-  
-  response.headers.set('X-Device-Type', isMobile ? 'mobile' : 'desktop');
-  response.headers.set('Vary', 'X-Device-Type');
-  
-  return response;
+**Cloudflare Edge** - Cloudflare servers around the world. When a user opens your site, Cloudflare serves the response from the nearest server without touching your origin. You can purge this cache via API.
+
+**Next.js server cache** - `unstable_cache`, ISR, built-in `fetch` cache. Works inside your app before the response ever reaches Cloudflare.
+
+Problems start when these levels conflict. For example: Next.js says "cache for 1 year", Cloudflare says "nope, 4 hours", and the browser does whatever it wants.
+
+---
+
+## First problem: fonts and icons were caching for only 4 hours
+
+I added this rule to `next.config.js`:
+
+```js
+{
+  source: '/:path*.(svg|ttf|woff|woff2)',
+  headers: [{ 
+    key: 'Cache-Control', 
+    value: 'public, max-age=31536000, immutable' // 1 year
+  }],
 }
 ```
 
-This ensures that mobile and desktop users get appropriately cached versions.
+Lighthouse still showed 4 hours for fonts and SVG icons. Why?
 
-## Locale-Based Cache Keys
+Turns out, `headers()` in `next.config.js` only applies to Next.js routes - pages and API handlers. Files from the `/public` folder (fonts, icons, images) are served directly by the Node.js static file server, which knows nothing about your config rules. It just sets the default 4 hours.
 
-For internationalized applications, each locale needs its own cache entry:
+**Fix** - configure caching for these files directly in Cloudflare using Cache Rules.
 
-```typescript
-// Route-based locale caching in Next.js
-// /en/products and /ru/products are cached separately by default
-// But API routes need explicit locale in cache keys
-export async function GET(request: NextRequest) {
-  const locale = request.nextUrl.pathname.split('/')[1];
-  const cacheKey = `products-${locale}`;
-  
-  // Check cache first, then fetch if needed
+### How to set up Cache Rules in Cloudflare
+
+Go to: Cloudflare Dashboard → your domain → Caching → Cache Rules → Create rule.
+
+**Rule for Next.js chunks:**
+
+```
+Expression: (starts_with(http.request.uri.path, "/_next/static/"))
+
+Edge TTL: Ignore cache-control header → 1 year
+Browser TTL: Override → 1 year
+```
+
+Why is it safe to set a year here? Because Next.js puts a hash in every file name: `page-a1b2c3.js`. On the next deploy, it becomes `page-x9y8z7.js`. The browser will never request the old file - it simply won't know it existed.
+
+**Rule for public static assets:**
+
+```
+Expression:
+(starts_with(http.request.uri.path, "/fonts/")) or
+(ends_with(http.request.uri.path, ".svg")) or
+(ends_with(http.request.uri.path, ".png")) or
+(ends_with(http.request.uri.path, ".ico")) or
+(ends_with(http.request.uri.path, ".webp"))
+
+Edge TTL: Ignore cache-control header → 1 year
+Browser TTL: Override → 1 year
+```
+
+After this, Lighthouse stopped complaining about fonts and icons.
+
+---
+
+## Browser TTL vs Edge TTL - what's the difference
+
+These are two different settings for two different recipients.
+
+**Edge TTL** - tells Cloudflare how long to keep the file on its servers. Set it to 1 year and Cloudflare serves from cache for a year without touching your origin.
+
+**Browser TTL** - tells the user's browser how long to store the file locally. Set it to 1 year and the browser won't make any request at all - not even to Cloudflare.
+
+Important: **Cloudflare cache purge does not clear the browser cache**. If you purge Cloudflare, users with old browser cache will still get the old version until Browser TTL expires.
+
+This is why you shouldn't set a large Browser TTL for HTML pages - after a deploy, some users will keep getting stale pages and there's nothing you can do about it.
+
+---
+
+## The main trap: Chunk Mismatch
+
+This was the most annoying problem I ran into after adding Cloudflare.
+
+### What are chunks
+
+Next.js splits your JavaScript into small files called chunks. Each page has its own chunk: `app/products/page-a1b2c3.js`. On a new deploy, the hash changes: `app/products/page-x9y8z7.js`.
+
+### How the problem happens
+
+Before Cloudflare everything worked fine: every HTML request went straight to the server, so HTML was always fresh and had up-to-date chunk references.
+
+After adding Cloudflare, HTML pages started getting cached on the edge. Here's what happens:
+
+1. User opens the site → Cloudflare caches the HTML with chunk references from build #1
+2. You deploy an update → the server now has chunks from build #2
+3. Another user opens the site → gets the **old** HTML from Cloudflare cache
+4. Browser tries to load `page-a1b2c3.js` → server returns 404, that file is gone
+5. Page breaks with "Loading chunk failed"
+
+```
+Loading chunk 9250 failed.
+https://daribar.kz/_next/static/chunks/app/page-f232cc789c4e7096.js
+```
+
+### How to fix it
+
+**Option 1 - Purge cache after every deploy**
+
+Add this step to your CI/CD pipeline right after deploy:
+
+```bash
+curl -X POST "https://api.cloudflare.com/client/v4/zones/{zone_id}/purge_cache" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  --data '{"purge_everything":true}'
+```
+
+Find `zone_id` and your token in the Cloudflare Dashboard. The token needs the `Cache Purge` permission for your zone.
+
+**Option 2 - Error boundary as a safety net**
+
+Even with purge, users who had a tab open during the deploy will hit this issue. Add an error handler in `app/error.tsx`:
+
+```tsx
+'use client';
+import { useEffect } from 'react';
+
+export default function Error({ error }: { error: Error }) {
+  useEffect(() => {
+    if (error.message?.includes('Loading chunk')) {
+      // Just reload - the user will get fresh HTML
+      window.location.reload();
+    }
+  }, [error]);
+
+  return <div>Reloading the page...</div>;
 }
 ```
 
-## Stale-While-Revalidate
+The user sees a quick flash and the page loads normally.
 
-The `stale-while-revalidate` pattern is incredibly powerful for production applications. It serves stale content immediately while fetching fresh content in the background.
+**Option 3 (best) - ISR instead of SSR**
 
+ISR (Incremental Static Regeneration) is when Next.js caches HTML at the server level and regenerates it in the background on a schedule. The origin always responds fast, and you can set Bypass in Cloudflare for HTML - chunk mismatch disappears completely.
+
+```js
+// app/products/[id]/page.tsx
+export const revalidate = 3600; // regenerate every hour
 ```
-Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400
-```
 
-This means:
-- For the first hour, serve the cached version
-- After that, serve stale content while revalidating in the background
-- Content is never older than 24 hours
+One limitation: if your component uses `cookies()`, `headers()`, or other dynamic APIs - ISR won't kick in and the page will render on every request. In that case, move the cookie reading deeper in the tree or to the client.
 
-## Cache Invalidation
+---
 
-The hardest problem in computer science, they say. In practice, I've found that time-based invalidation with manual purge capability works well for most applications.
+## Don't cache 404s
 
-## Key Principles
+One small but important detail. Cloudflare can cache a 404 response - for example on a missing old chunk. Then even after a purge, users keep getting 404 from cache.
 
-1. **Cache at the edge** whenever possible — it's the fastest layer
-2. **Segment caches** by the variables that affect output
-3. **Use stale-while-revalidate** for the best user experience
-4. **Monitor cache hit rates** — if they're low, something is wrong
-5. **Have a manual purge mechanism** for emergencies
+In the Cache Rule for `/_next/static/`, add a Status Code TTL:
+- Status code: **404** → Duration: **No store**
+
+---
+
+## Summary: what to cache and how
+
+| What | Edge TTL | Browser TTL | Why |
+|---|---|---|---|
+| `/_next/static/*` | 1 year | 1 year | Hashes change on deploy - safe |
+| Fonts, SVG, PNG | 1 year | 1 year | Rarely change, stable file names |
+| HTML pages | Bypass or 5 min | Don't cache | Otherwise chunk mismatch |
+| Private pages (cart, orders) | Bypass | Bypass | Personal data |
+
+## Key takeaways
+
+`headers()` in `next.config.js` doesn't work for files in `/public` - use Cloudflare Cache Rules instead.
+
+Chunk hashes only save you if the HTML is fresh. Stale cached HTML + new deploy = broken pages.
+
+Browser TTL can't be purged remotely - don't set large values for HTML.
+
+Purge everything after every deploy - a must if you're caching HTML on Cloudflare.
+
+ISR is the best solution for pages with relatively stable content. Fewer invalidation headaches and a fast origin.

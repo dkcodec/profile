@@ -1,68 +1,66 @@
 ---
-title: "Building a Design System from Scratch"
-description: "Lessons learned from creating dkcodec-ui, an open-source React component library with 500+ weekly downloads on NPM."
-date: "2025-01-08"
-tags: ["React", "Design System", "TypeScript", "Open Source"]
+title: "I Published My First npm Package as a Second-Year Student"
+description: "How I built dkcodec-ui-kit - a small React component library with a 2D flat style - and what happened after I pushed it to npm."
+date: "2026-03-05"
+tags: ["React", "TypeScript", "Open Source", "npm"]
 author: "Dmitriy Kairgeldin"
 published: true
 ---
 
-## Why Build a Design System?
+## How it started
 
-After working on multiple projects, I noticed a recurring pattern: I was rebuilding the same components over and over. Buttons, inputs, modals, cards — the same patterns, slightly different each time. That's when I decided to build dkcodec-ui.
+Second year of university. I kept copying the same button and input styles from project to project, tweaking colors each time. At some point I thought - why not just make a package once and install it everywhere?
 
-## Architecture Decisions
+So I did. No big plans, no roadmap. Just wanted to stop copy-pasting.
 
-### Component API Design
+## What's inside
 
-The most important decision was the component API. I wanted something that felt natural to React developers while being flexible enough for different use cases.
+The library is called [dkcodec-ui-kit](https://github.com/dkcodec/Dkcodec-ui-kit). It has three components: `Button2D`, `Toggle2D`, and `Input2D`. The idea behind all of them is a flat 2D style - no shadows, no gradients, clean geometric shapes with a slight offset effect.
 
 ```tsx
-// Simple and intuitive API
-<Button variant="primary" size="lg">
-  Click me
-</Button>
+import { Button2D, Toggle2D, Input2D } from 'dkcodec-ui-kit'
 
-// Composable pattern for complex components
-<Card>
-  <CardHeader>
-    <CardTitle>Title</CardTitle>
-  </CardHeader>
-  <CardContent>Content here</CardContent>
-</Card>
+// Basic usage
+<Button2D>Click me</Button2D>
+
+// With customization
+<Button2D
+  size="lg"
+  textColor="darkblue"
+  btnColor="lightblue"
+  borderColor="blue"
+  background="darkblue"
+>
+  Custom Button
+</Button2D>
 ```
 
-### TypeScript First
+Everything is written in TypeScript, fully typed. You get autocomplete and instant feedback if you pass the wrong prop type.
 
-Every component is fully typed with TypeScript. This provides autocomplete in editors and catches errors at compile time rather than runtime.
+The components support five sizes (`sm`, `md`, `lg`, `xl`, `2xl`) and let you override colors through props - text, background, border, inner fill. Not the most sophisticated API in the world, but it works and it's intuitive.
 
-```typescript
-interface ButtonProps {
-  variant: 'primary' | 'secondary' | 'ghost';
-  size: 'sm' | 'md' | 'lg';
-  disabled?: boolean;
-  children: React.ReactNode;
-}
-```
+## What happened after publishing
 
-### Tree-Shaking Support
+I pushed it to npm and kind of forgot about it. Then checked the stats a month later and saw 584 downloads in the first month. For a tiny library built by a second-year student with three components that felt pretty good.
 
-The library is built with tree-shaking in mind. Each component is a separate module, so bundlers only include the components you actually use.
+![npm download stats: 584 downloads](/images/blog/building-design-system/dkcodec-npm-stats.jpg)
 
-## Publishing to NPM
+I didn't promote it anywhere seriously. People just found it through npm search.
 
-The publishing workflow uses GitHub Actions for CI/CD:
+## What I'd do differently now
 
-1. Version bump and changelog generation
-2. Build the library with Rollup
-3. Run type checking and linting
-4. Publish to NPM registry
+Honestly, the code is pretty basic - I was just learning at the time. A few things I'd change today:
 
-## Lessons Learned
+**No interactive docs.** The README has examples, but there's no Storybook playground. That's the first thing I'd add - people want to see components before installing a library.
 
-- **Start small** — ship a few solid components rather than a huge, untested library
-- **Documentation matters** — Storybook made the library usable for others
-- **Versioning is important** — follow semver strictly to maintain trust
-- **Listen to users** — the best improvements came from community feedback
+**Three components is too few.** A UI kit needs at least a modal, a select, and some layout primitives to be actually useful in a real project.
 
-The library now has 500+ weekly downloads, and it's been a great learning experience in open-source maintainership.
+**Webpack instead of a proper bundler.** I'd switch to something like tsup or Rollup for better tree-shaking and smaller bundle output.
+
+## What's next
+
+The library is still sitting there and I plan to come back to it. The 2D flat style is something I genuinely like - there's a lot of SaaS dashboards out there that would look great with this aesthetic.
+
+When I do update it, the priorities are: more components, Storybook docs, and a cleaner build setup.
+
+For now it's a small proof that you don't need to wait until you're "ready" to publish something. A second-year student with three components got 677 total downloads.

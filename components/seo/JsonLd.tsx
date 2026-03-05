@@ -40,18 +40,42 @@ export function blogPostJsonLd(post: {
   date: string;
   slug: string;
   locale: string;
+  image?: string;
+  tags?: string[];
+  readingTime?: number;
 }) {
+  const siteUrl = "https://kairgeldin.dev";
+  const postUrl = `${siteUrl}/${post.locale}/blog/${post.slug}`;
+  const ogImage = post.image
+    ? `${siteUrl}${post.image}`
+    : `${siteUrl}/og-default.png`;
+
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": postUrl,
+    },
     headline: post.title,
     description: post.description,
+    image: ogImage,
     author: {
       "@type": "Person",
       name: "Dmitriy Kairgeldin",
+      url: siteUrl,
+    },
+    publisher: {
+      "@type": "Person",
+      name: "Dmitriy Kairgeldin",
+      url: siteUrl,
     },
     datePublished: post.date,
-    url: `https://kairgeldin.dev/${post.locale}/blog/${post.slug}`,
+    dateModified: post.date,
+    url: postUrl,
+    inLanguage: post.locale,
+    keywords: post.tags?.join(", "),
+    timeRequired: post.readingTime ? `PT${post.readingTime}M` : undefined,
   };
 }
 
